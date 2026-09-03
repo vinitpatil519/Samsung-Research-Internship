@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import base64
 import io
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -117,4 +117,138 @@ def histogram_image(hist: np.ndarray, colour: Tuple[int, int, int],
         x0 = i * bar_w
         y0 = int((1 - v) * (h - 4))
         cv2.rectangle(canvas, (x0, y0), (x0 + bar_w - 1, h - 1), colour, -1)
+    return canvas
+
+
+# Palette reused by the classification bars and the t-SNE scatter (RGB).
+PALETTE: List[Tuple[int, int, int]] = [
+    (5, 150, 105), (37, 99, 235), (180, 83, 9), (124, 58, 237), (220, 38, 38),
+    (8, 145, 178), (101, 163, 13), (219, 39, 119), (71, 85, 105), (202, 138, 4),
+    (13, 148, 136), (79, 70, 229), (147, 51, 234), (22, 163, 74),
+]
+
+_ACCENT = (5, 150, 105)
+_INK = (15, 23, 42)
+_MUTED = (100, 116, 139)
+_LINE = (226, 232, 240)
+
+
+def _shorten(text: str, limit: int) -> str:
+    return text if len(text) <= limit else text[: limit - 1] + "."
+
+
+def probability_bars(
+    entries: List[Tuple[str, float]],
+    size: Tuple[int, int] = (460, 560),
+    title: str = "Class probabilities (%)",
+) -> np.ndarray:
+    """Horizontal bar chart of the top class probabilities.
+
+    `entries` is an ordered list of (label, percentage). The winning class is
+    drawn in the accent colour, the rest in grey, so the decision margin is
+    visible at a glance rather than only readable in the metrics table.
+    """
+    h, w = size
+    canvas = np.full((h, w, 3), 255, dtype=np.uint8)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    cv2.putText(canvas, title, (14, 30), font, 0.52, _INK, 1, cv2.LINE_AA)
+    cv2.line(canvas, (14, 42), (w - 14, 42), _LINE, 1)
+
+    if not entries:
+        cv2.putText(canvas, "no predictions", (14, 70), font, 0.45, _MUTED, 1, cv2.LINE_AA)
+        return canvas
+
+    top = 74
+    row_h = min(78, (h - top - 16) // max(1, len(entries)))
+    bar_left, bar_right = 14, w - 60
+
+    for index, (label, percentage) in enumerate(entries):
+        y = top + index * row_h
+        colour = _ACCENT if index == 0 else (203, 213, 225)
+
+        cv2.putText(canvas, _shorten(label, 46), (bar_left, y), font, 0.46,
+                    _INK if index == 0 else _MUTED, 1, cv2.LINE_AA)
+
+        track_top, track_bottom = y + 10, y + 10 + 18
+        cv2.rectangle(canvas, (bar_left, track_top), (bar_right, track_bottom),
+                      (241, 245, 249), -1)
+        filled = int(bar_left + (bar_right - bar_left) * max(0.0, min(100.0, percentage)) / 100.0)
+        if filled > bar_left:
+            cv2.rectangle(canvas, (bar_left, track_top), (filled, track_bottom), colour, -1)
+
+        cv2.putText(canvas, f"{percentage:5.2f}%", (bar_right + 6, track_bottom - 3),
+                    font, 0.44, _INK if index == 0 else _MUTED, 1, cv2.LINE_AA)
+
+    return canvas
+
+
+def scatter_plot(
+    points: np.ndarray,
+    labels: np.ndarray,
+    sample: Tuple[float, float],
+    class_names: List[str],
+    size: Tuple[int, int] = (460, 560),
+    title: str = "t-SNE of the 256-d sparse latent code",
+) -> np.ndarray:
+    """Render the t-SNE reference cloud with the uploaded sample marked.
+
+    Reference points are coloured by plant species (the genus prefix of the
+    class name); the upload is drawn as a black cross-hair marker.
+    """
+    h, w = size
+    canvas = np.full((h, w, 3), 255, dtype=np.uint8)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    cv2.putText(canvas, title, (14, 26), font, 0.45, _INK, 1, cv2.LINE_AA)
+
+    pad_left, pad_right, pad_top, pad_bottom = 40, 16, 40, 46
+    plot_w = w - pad_left - pad_right
+    plot_h = h - pad_top - pad_bottom
+
+    if points.size == 0:
+        cv2.putText(canvas, "no reference points", (14, 70), font, 0.45, _MUTED, 1, cv2.LINE_AA)
+        return canvas
+
+    all_x = np.append(points[:, 0], sample[0])
+    all_y = np.append(points[:, 1], sample[1])
+    x_lo, x_hi = float(all_x.min()), float(all_x.max())
+    y_lo, y_hi = float(all_y.min()), float(all_y.max())
+    x_span = max(x_hi - x_lo, 1e-6)
+    y_span = max(y_hi - y_lo, 1e-6)
+
+    def to_px(x: float, y: float) -> Tuple[int, int]:
+        px = pad_left + int((x - x_lo) / x_span * (plot_w - 1))
+        # Screen y grows downward, so the axis is flipped.
+        py = pad_top + int((1 - (y - y_lo) / y_span) * (plot_h - 1))
+        return px, py
+
+    # Plot frame and a light grid.
+    cv2.rectangle(canvas, (pad_left, pad_top), (pad_left + plot_w, pad_top + plot_h), _LINE, 1)
+    for i in range(1, 4):
+        gx = pad_left + i * plot_w // 4
+        gy = pad_top + i * plot_h // 4
+        cv2.line(canvas, (gx, pad_top), (gx, pad_top + plot_h), (241, 245, 249), 1)
+        cv2.line(canvas, (pad_left, gy), (pad_left + plot_w, gy), (241, 245, 249), 1)
+
+    # Stable species -> colour mapping, so the legend matches across requests.
+    species = sorted({class_names[int(i)].split("___")[0] for i in labels})
+    colour_of = {name: PALETTE[i % len(PALETTE)] for i, name in enumerate(species)}
+
+    for (x, y), label in zip(points, labels):
+        px, py = to_px(float(x), float(y))
+        colour = colour_of[class_names[int(label)].split("___")[0]]
+        cv2.circle(canvas, (px, py), 2, colour, -1, cv2.LINE_AA)
+
+    # The upload: white halo, black cross-hair, so it reads over any cluster.
+    sx, sy = to_px(float(sample[0]), float(sample[1]))
+    cv2.circle(canvas, (sx, sy), 7, (255, 255, 255), -1, cv2.LINE_AA)
+    cv2.circle(canvas, (sx, sy), 7, _INK, 2, cv2.LINE_AA)
+    cv2.line(canvas, (sx - 11, sy), (sx + 11, sy), _INK, 1, cv2.LINE_AA)
+    cv2.line(canvas, (sx, sy - 11), (sx, sy + 11), _INK, 1, cv2.LINE_AA)
+
+    cv2.putText(canvas, "uploaded sample", (14, h - 26), font, 0.4, _INK, 1, cv2.LINE_AA)
+    cv2.circle(canvas, (128, h - 30), 4, _INK, 2, cv2.LINE_AA)
+    cv2.putText(canvas, f"{len(points)} training points, {len(species)} species",
+                (14, h - 10), font, 0.38, _MUTED, 1, cv2.LINE_AA)
     return canvas

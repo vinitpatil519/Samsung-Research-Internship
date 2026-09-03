@@ -57,7 +57,9 @@ def main() -> int:
     ids = [stage["id"] for stage in result["stages"]]
     assert ids == EXPECTED_STAGES, f"stage graph changed: {ids}"
 
-    for stage in result["stages"][:10]:
+    for stage in result["stages"]:
+        if stage["id"] in {"sparse_encoder", "classifier", "tsne"} and not stage["available"]:
+            continue
         assert stage["image"], f"stage {stage['id']} produced no image"
 
     segmented = pipeline.segment_only(synthetic_leaf())

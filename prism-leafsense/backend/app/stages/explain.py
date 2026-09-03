@@ -104,7 +104,15 @@ def tsne_placement(latent: Optional[np.ndarray], k: int = 15, max_points: int = 
         labels = labels[::step]
 
     names = reference["class_names"]
-    neighbour_classes = [names[int(labels_i)] for labels_i in reference["labels"][nearest[:5]]]
+    # Distinct classes, nearest first: repeating the same class five times
+    # says nothing the top prediction has not already said.
+    neighbour_classes: List[str] = []
+    for index in nearest:
+        name = names[int(reference["labels"][index])]
+        if name not in neighbour_classes:
+            neighbour_classes.append(name)
+        if len(neighbour_classes) == 5:
+            break
 
     return TsneResult(
         available=True,

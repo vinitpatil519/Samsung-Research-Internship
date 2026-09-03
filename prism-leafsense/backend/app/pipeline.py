@@ -210,13 +210,28 @@ def analyse(raw: bytes, top_k: int = 3) -> Dict[str, Any]:
     ))
 
     top = cls.predictions[0] if cls.predictions else None
+    # Render the decision itself: the top-5 softmax bars, so this stage has a
+    # visual output like every other stage rather than a numbers-only card.
+    if cls.available and cls.probabilities is not None:
+        class_names = registry.class_names()
+        order = np.argsort(cls.probabilities)[::-1][:5]
+        bars = [
+            (class_names[int(i)].replace("___", " - ").replace("_", " "),
+             float(cls.probabilities[int(i)] * 100.0))
+            for i in order
+        ]
+        classifier_image = imaging.to_data_url(imaging.probability_bars(bars), max_side=560)
+    else:
+        classifier_image = None
+
     stages.append(Stage(
         id="classifier",
         title="EfficientNet Classification",
         model="efficientnet",
-        summary=(f"{top.plant} - {top.disease} at {top.probability:.2f}% confidence."
+        summary=(f"{top.plant} - {top.disease} at {top.probability:.2f}% confidence; "
+                 f"top-5 of {len(registry.class_names())} class probabilities shown."
                  if top else cls.detail),
-        image=None,
+        image=classifier_image,
         metrics={
             "entropy_bits": round(cls.entropy, 4),
             "margin": round(cls.margin, 2),
@@ -247,13 +262,26 @@ def analyse(raw: bytes, top_k: int = 3) -> Dict[str, Any]:
     # ------------------------------------------------- 12. t-SNE placement
     tsne = explain.tsne_placement(enc.latent if enc.available else None)
     tsne_ms = clock.lap()
+    if tsne.available and tsne.points is not None and tsne.sample is not None:
+        tsne_image = imaging.to_data_url(
+            imaging.scatter_plot(
+                tsne.points, tsne.labels, (tsne.sample[0], tsne.sample[1]),
+                tsne.class_names or [],
+            ),
+            max_side=560,
+        )
+    else:
+        tsne_image = None
+
     stages.append(Stage(
         id="tsne",
         title="t-SNE Embedding",
         model="latent space",
-        summary=("Uploaded leaf placed among training clusters by nearest latent neighbours."
+        summary=("Uploaded leaf placed among training clusters by its nearest latent neighbours; "
+                 f"closest training classes: "
+                 f"{', '.join(n.replace('___', ' - ').replace('_', ' ') for n in (tsne.neighbour_classes or [])[:3])}."
                  if tsne.available else tsne.detail),
-        image=None,
+        image=tsne_image,
         metrics={"neighbours": tsne.neighbour_classes or []},
         duration_ms=tsne_ms,
         available=tsne.available,

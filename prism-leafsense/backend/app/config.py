@@ -36,5 +36,9 @@ DEVICE = os.getenv("LEAFSENSE_DEVICE", "auto")
 MAX_UPLOAD_BYTES = int(os.getenv("LEAFSENSE_MAX_UPLOAD_BYTES", 12 * 1024 * 1024))
 ALLOWED_ORIGINS = os.getenv(
     "LEAFSENSE_ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+    ",".join(
+        f"http://{host}:{port}"
+        for host in ("localhost", "127.0.0.1")
+        for port in (3000, 3001, 3002, 3003)
+    ),
 ).split(",")
