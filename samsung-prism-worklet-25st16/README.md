@@ -1,4 +1,4 @@
-# PRISM LeafSense
+# Samsung Research (Prism) Worklet:25ST16
 
 End-to-end plant leaf disease diagnosis: **U-Net++ segmentation → deep + handcrafted feature
 fusion → Auto Sparse Stacked Encoder → EfficientNet classification → Grad-CAM and t-SNE**, with a
@@ -13,7 +13,7 @@ Upload/Camera → Resize → Gaussian → CLAHE → U-Net++ mask → Masked leaf
 ## Repository layout
 
 ```
-prism-leafsense/
+samsung-prism-worklet-25st16/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py            FastAPI app: /health /classes /predict /segment

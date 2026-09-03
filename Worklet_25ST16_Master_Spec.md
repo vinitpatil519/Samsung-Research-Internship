@@ -1,4 +1,4 @@
-# PRISM LeafSense --- Master Project Specification
+# Samsung Research (Prism) Worklet:25ST16 --- Master Project Specification
 
 > End-to-end multimodal plant disease diagnosis platform combining
 > **U-Net++ segmentation + EfficientNet classification + Auto Sparse
@@ -249,7 +249,7 @@ Upload → Segment → Features → Encoder → EfficientNet → GradCAM → JSO
 ## 15. Folder Structure
 
 ``` text
-prism-leafsense/
+samsung-prism-worklet-25st16/
 │
 ├── frontend/
 ├── backend/

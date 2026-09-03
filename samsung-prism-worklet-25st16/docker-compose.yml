@@ -6,8 +6,8 @@ services:
     volumes:
       - ./weights:/weights:ro
     environment:
-      LEAFSENSE_WEIGHTS_DIR: /weights
-      LEAFSENSE_ALLOWED_ORIGINS: http://localhost:3000
+      WORKLET_WEIGHTS_DIR: /weights
+      WORKLET_ALLOWED_ORIGINS: http://localhost:3000
 
   frontend:
     build: ./frontend

@@ -21,13 +21,13 @@ export default function HomePage() {
   return (
     <div className="space-y-14">
       <section className="paper-grid -mx-4 rounded-3xl px-4 py-12 sm:-mx-6 sm:px-10">
-        <p className="mono-label">Samsung PRISM · research demonstrator</p>
+        <p className="mono-label">Samsung Research (Prism) · Worklet 25ST16</p>
         <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
           Leaf disease diagnosis you can watch happen,{" "}
           <span className="text-accent">stage by stage</span>.
         </h1>
         <p className="mt-4 max-w-2xl text-base text-muted">
-          LeafSense segments the leaf with U-Net++, fuses deep and handcrafted features, compresses
+          Worklet 25ST16 segments the leaf with U-Net++, fuses deep and handcrafted features, compresses
           them through a sparse stacked encoder, and classifies species and disease with
           EfficientNet. Every intermediate image is returned, not hidden.
         </p>

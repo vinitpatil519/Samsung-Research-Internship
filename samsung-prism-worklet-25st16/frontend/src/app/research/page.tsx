@@ -93,7 +93,7 @@ export default function ResearchPage() {
     <div className="space-y-8">
       <header>
         <p className="mono-label">Method</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">How LeafSense works</h1>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">How Worklet 25ST16 works</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           Six blocks, each with a job the next one depends on. Open a card for the details.
         </p>

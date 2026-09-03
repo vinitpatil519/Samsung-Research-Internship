@@ -31,7 +31,7 @@ SPLIT_FILES = [
 ]
 KEEP_PREFIXES = ("color", "segmented")
 CHUNK = 1024 * 1024
-USER_AGENT = "prism-leafsense/1.0"
+USER_AGENT = "samsung-prism-worklet-25st16/1.0"
 
 
 def log(msg: str) -> None:

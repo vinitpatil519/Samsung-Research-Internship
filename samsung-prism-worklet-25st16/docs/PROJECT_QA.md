@@ -1,4 +1,4 @@
-# PRISM LeafSense — Project Q&A
+# Samsung Research (Prism) Worklet:25ST16 — Project Q&A
 
 27 questions covering the whole project: what it does, why each design choice was made, how each
 model works, and where the limits are. Written so you can read it once and then explain the project
@@ -8,7 +8,7 @@ to anyone — a reviewer, a professor, or an interviewer.
 
 ### 1. Explain the project in one minute.
 
-LeafSense diagnoses plant leaf disease from a single photograph. A user uploads a leaf image or
+Worklet 25ST16 diagnoses plant leaf disease from a single photograph. A user uploads a leaf image or
 takes one with a phone camera. The backend runs a five-block pipeline: preprocessing normalises the
 image; a U-Net++ network segments the leaf away from the background; a feature block extracts deep
 CNN features together with classical GLCM, Gabor, colour and shape descriptors; a sparse stacked

@@ -18,10 +18,10 @@ from .labels import CLASS_NAMES, LABELS
 from .models.registry import DEVICE, registry
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logger = logging.getLogger("leafsense")
+logger = logging.getLogger("worklet25st16")
 
 app = FastAPI(
-    title="PRISM LeafSense API",
+    title="Samsung Research (Prism) Worklet:25ST16 API",
     version="1.0.0",
     description="U-Net++ segmentation, sparse encoding and EfficientNet leaf disease diagnosis.",
 )
