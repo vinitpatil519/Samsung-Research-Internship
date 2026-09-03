@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.next/
+datasets/
+weights/*.pt
+weights/*.npz
+weights/*.npy
+*.log
+.env*.local

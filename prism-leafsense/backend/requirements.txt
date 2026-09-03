@@ -1,0 +1,14 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic>=2.7
+numpy>=1.26
+opencv-python-headless>=4.9
+pillow>=10.0
+scikit-image>=0.22
+scikit-learn>=1.4
+torch>=2.2
+torchvision>=0.17
+timm>=1.0
+tqdm>=4.66
+huggingface-hub>=0.23

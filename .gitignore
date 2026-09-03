@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Data and model artefacts (regenerate with backend/training scripts)
+datasets/
+weights/*.pt
+weights/*.npz
+weights/*.npy
+
+# Local runtime files
+*.log
+*.err
+*.pid
+.env*.local
+
+# Local scratch images
+download*.jpg
